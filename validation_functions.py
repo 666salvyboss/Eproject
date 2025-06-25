@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 from tutor import user
 load_dotenv()
-key = os.getenv("KEY")
+key = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 def create_token(agent_name: str, expire_hour: int = 48):
