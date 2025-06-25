@@ -1,23 +1,21 @@
 import hashlib
+import os
 
 import bcrypt
 import re
 from datetime import datetime, timedelta
 import jwt
 from fastapi import HTTPException
+from dotenv import load_dotenv
 
 from tutor import user
-
-key = "@Fury!cunt//Hitl12324{}attentiondi4sa7rmed"
+load_dotenv()
+key = os.getenv("KEY")
 ALGORITHM = "HS256"
 
 def create_token(agent_name: str, expire_hour: int = 48):
     try:
         expire = datetime.utcnow() + timedelta(hours=expire_hour)
-        #if not row:
-         #   raise HTTPException(status_code=401, detail="User not found")
-
-        #id, password_hash, user_role = row
         payload = {
             "sub": user["name"],
             "exp": int(expire.timestamp()),

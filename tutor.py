@@ -60,8 +60,15 @@ class Work(Enum):
 # Endpoints
 @registration.post("/tutor/register")
 def register_tutor(data: Tutor):
-    for validator in [is_valid_phone, is_valid_email, is_valid_password]:
-        valid, msg = validator(getattr(data, validator.__name__.split('_')[2]))
+    validators = {
+        "phone": is_valid_phone,
+        "email": is_valid_email,
+        "password": is_valid_password
+    }
+
+    for field, validator in validators.items():
+        value = getattr(data, field, None)
+        valid, msg = validator(value)
         if not valid:
             raise HTTPException(status_code=401, detail=msg)
 
