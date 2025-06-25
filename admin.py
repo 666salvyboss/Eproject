@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 import bcrypt
 from fastapi.params import Depends
 from pymongo import MongoClient, errors
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from tutor import user
@@ -12,7 +13,14 @@ from validation_functions import is_valid_phone, is_valid_email, is_valid_passwo
 
 client = MongoClient("mongodb://atlas-sql-68595ac755a50c4c1c0375eb-"
                      "tg2o9l.a.query.mongodb.net/sample_mflix?ssl=true&authSource=admin ")
-admin_registration = APIRouter()
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],      # ⚠️ "*" only allowed when...
+    allow_credentials=False,  # ...credentials are False
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 db = client["Admin_database"]
 admin_collection = db["Admin"]
 course_collection = db["Course"]
@@ -37,7 +45,7 @@ class Course(BaseModel):
     tags: list
     level: str
 
-@admin_registration.post("/admin/register")
+@app.post("/admin/register")
 def register_admin(data: Admin):
     validators = {
         "phone": is_valid_phone,
@@ -81,7 +89,7 @@ def register_admin(data: Admin):
     token = create_token(data.name)
     return {"token": token, "message": "Beware thy actions — the script watches you."}
 
-@admin_registration.post("/admin/login")
+@app.post("/admin/login")
 def login_admin(data: Login):
     valid, msg = is_valid_password(data.password)
     if not valid:
@@ -99,7 +107,7 @@ def login_admin(data: Login):
     else:
         raise HTTPException(status_code=401, detail="Incorrect credentials")
 
-@admin_registration.post("/create/course")
+@app.post("/create/course")
 def create_course(data: Course, valid=Depends(validate_token)):
     doc = {
         "title": data.title,
